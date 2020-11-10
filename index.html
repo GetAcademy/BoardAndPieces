@@ -16,7 +16,7 @@
 
         .dark,
         .light {
-            font-size: 240%;
+            font-size: 200%;
             text-align: center;
         }
 
@@ -31,56 +31,95 @@
 </head>
 
 <body>
-    <div id="board">
-    </div>
-    <button onclick="move(-1,0)">Opp</button><br/>
-    <button onclick="move(0,-1)">Venstre</button>
-    <button onclick="move(0,1)">Høyre</button><br/>
-    <button onclick="move(1,0)">Ned</button>
+    <div id="app"></div>
 
     <script>
         // model
-        var pieceRow = 0;
-        var pieceCol = 2;
+        var blackPieceRow = 0;
+        var blackPieceCol = 0;
+        var whitePieceRow = 4;
+        var whitePieceCol = 4;
+        var isWhitePieceSelected = true;
 
         // controller
-        function move(moveRow, moveCol){
-            pieceRow += moveRow;
-            pieceCol += moveCol;
+        function move(moveRow, moveCol) {
+            if (isWhitePieceSelected) {
+                whitePieceRow += moveRow;
+                whitePieceCol += moveCol;
+            } else {
+                blackPieceRow += moveRow;
+                blackPieceCol += moveCol;
+            }
             updateView();
         }
 
-        // view
-        function getRowHtml(row, color1, color2){
-            return `
-                <div class="${color1}">${getCellContent(row, 0)}</div>
-                <div class="${color2}">${getCellContent(row, 1)}</div>
-                <div class="${color1}">${getCellContent(row, 2)}</div>
-                <div class="${color2}">${getCellContent(row, 3)}</div>
-                <div class="${color1}">${getCellContent(row, 4)}</div>
-                <div class="${color2}">${getCellContent(row, 5)}</div>
-                <div class="${color1}">${getCellContent(row, 6)}</div>
-                <div class="${color2}">${getCellContent(row, 7)}</div>            
-            `;
+        function selectPiece(newValueIsWhitePieceSelected) {
+            isWhitePieceSelected = newValueIsWhitePieceSelected;
+            updateView();
         }
 
+        function swapPieces() {
+            var tmpCol = whitePieceCol;
+            var tmpRow = whitePieceRow;
+            whitePieceCol = blackPieceCol;
+            whitePieceRow = blackPieceRow;
+            blackPieceCol = tmpCol;
+            blackPieceRow = tmpRow;
+            updateView();
+        }
 
+        // view        
         updateView();
         function updateView() {
-            document.getElementById('board').innerHTML = `
-                ${getRowHtml(0, 'light' ,'dark')}
-                ${getRowHtml(1, 'dark', 'light')}
-                ${getRowHtml(2, 'light' ,'dark')}
-                ${getRowHtml(3, 'dark', 'light')}
-                ${getRowHtml(4, 'light' ,'dark')}
-                ${getRowHtml(5, 'dark', 'light')}
-                ${getRowHtml(6, 'light' ,'dark')}
-                ${getRowHtml(7, 'dark', 'light')}     
+            document.getElementById('app').innerHTML = `
+            
+            <div id="board">
+                ${getRowHtml(0, 'light', 'dark')
+                + getRowHtml(1, 'dark', 'light')
+                + getRowHtml(2, 'light', 'dark')
+                + getRowHtml(3, 'dark', 'light')
+                + getRowHtml(4, 'light', 'dark')
+                + getRowHtml(5, 'dark', 'light')
+                + getRowHtml(6, 'light', 'dark')
+                + getRowHtml(7, 'dark', 'light')}
+            </div>
+            <button onclick="move(-1,0)">Opp</button><br />
+            <button onclick="move(0,-1)">Venstre</button>
+            <button onclick="move(0,1)">Høyre</button><br />
+            <button onclick="move(1,0)">Ned</button>
+            <br /><br />
+            <button onclick="selectPiece(true)">Velge hvit brikke</button>
+            <button onclick="selectPiece(false)">Velge svart brikke</button>
+            Valgt brikke: <b>${isWhitePieceSelected ? 'hvit' : 'svart'}</b>     
+            <br/><br/>
+            <button onclick="swapPieces()">Bytt</button>
             `;
         }
 
-        function getCellContent(row, col) {
-            return pieceRow == row && pieceCol == col ? '⬤' : '';
+        function getCellHtml(row, col, color) {
+            var hasBlackPiece = blackPieceRow == row && blackPieceCol == col;
+            var hasWhitePiece = whitePieceRow == row && whitePieceCol == col;
+            //var content =  isPiece ? '⬤' : '';
+            var content = '';
+            if (hasBlackPiece && hasWhitePiece) {
+                content = '⬤<span style="color: white">⬤</span>';
+            } else if (hasBlackPiece) {
+                content = '⬤';
+            } else if (hasWhitePiece) {
+                content = '<span style="color: white">⬤</span>';
+            }
+            return `<div class="${color}">${content}</div>`;
+        }
+
+        function getRowHtml(row, color1, color2) {
+            return getCellHtml(row, 0, color1)
+                + getCellHtml(row, 1, color2)
+                + getCellHtml(row, 2, color1)
+                + getCellHtml(row, 3, color2)
+                + getCellHtml(row, 4, color1)
+                + getCellHtml(row, 5, color2)
+                + getCellHtml(row, 6, color1)
+                + getCellHtml(row, 7, color2);
         }
     </script>
 </body>
